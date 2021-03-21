@@ -125,6 +125,9 @@ export default class BlockEvents extends Module {
       return;
     }
 
+    if(currentBlock.name === 'readusCodeBlock'){
+      return;
+    }
     const canOpenToolbox = Tools.isDefault(currentBlock.tool) && currentBlock.isEmpty;
     const conversionToolbarOpened = !currentBlock.isEmpty && ConversionToolbar.opened;
     const inlineToolbarOpened = !currentBlock.isEmpty && !SelectionUtils.isCollapsed && InlineToolbar.opened;
@@ -210,6 +213,43 @@ export default class BlockEvents extends Module {
     const currentBlock = BlockManager.currentBlock;
     const tool = Tools.available[currentBlock.name];
 
+    if(currentBlock.name === 'readusCodeBlock'){
+      if(event.shiftKey && event.keyCode === _.keyCodes.ENTER){
+        let newCurrent = this.Editor.BlockManager.currentBlock;
+
+        /**
+         * If enter has been pressed at the start of the text, just insert paragraph Block above
+         */
+        if (this.Editor.Caret.isAtStart && !this.Editor.BlockManager.currentBlock.hasMedia) {
+          this.Editor.BlockManager.insertDefaultBlockAtIndex(this.Editor.BlockManager.currentBlockIndex);
+        } else {
+          /**
+           * Split the Current Block into two blocks
+           * Renew local current node after split
+           */
+          newCurrent = this.Editor.BlockManager.split();
+        }
+    
+        this.Editor.Caret.setToBlock(newCurrent);
+    
+        /**
+         * If new Block is empty
+         */
+        if (this.Editor.Tools.isDefault(newCurrent.tool) && newCurrent.isEmpty) {
+          /**
+           * Show Toolbar
+           */
+          this.Editor.Toolbar.open(false);
+    
+          /**
+           * Show Plus Button
+           */
+          this.Editor.Toolbar.plusButton.show();
+        }
+    
+        event.preventDefault();
+      }
+    }
     /**
      * Don't handle Enter keydowns when Tool sets enableLineBreaks to true.
      * Uses for Tools like <code> where line breaks should be handled by default behaviour.
