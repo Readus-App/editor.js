@@ -1,6 +1,6 @@
 # --- proj files ---
 .DS_Store
-# .npmrc
+.npmrc
 Thumbs.db
 /.idea/
 /*.sublime-project
